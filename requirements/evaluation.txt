@@ -1,0 +1,9 @@
+# Evaluation and visualization
+-r base.txt
+plotly>=5.10.0
+ipywidgets>=8.0.0
+jupyter>=1.0.0
+ipykernel>=6.15.0
+bokeh>=2.4.0
+altair>=4.2.0
+nilearn>=0.9.0
