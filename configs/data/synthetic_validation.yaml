@@ -1,0 +1,69 @@
+# Synthetic Data Generation for Mathematical Validation
+
+synthetic_data:
+  enable: true
+  generation_strategy: "controlled_mathematical_validation"
+  
+  # Volume specifications
+  volume_specs:
+    spatial_dims: [128, 128, 128]
+    voxel_size: [0.5, 0.5, 0.5]  # mm
+    
+  # Tissue simulation parameters
+  tissue_simulation:
+    num_tissue_classes: 17  # DrawEM compatibility
+    tissue_intensities:
+      csf: [200, 300]
+      cortical_plate: [400, 600] 
+      white_matter: [350, 500]
+      deep_gray_matter: [300, 450]
+    
+    # Anatomical structure generation
+    geometric_shapes:
+      enable: true
+      shapes: ["sphere", "ellipsoid", "complex_mesh"]
+      noise_levels: [0.0, 0.05, 0.1, 0.15, 0.2]
+  
+  # Site effect simulation
+  site_effects:
+    num_simulated_sites: 5
+    intensity_variations:
+      multiplicative_range: [0.8, 1.2]
+      additive_range: [-50, 50]
+    
+    # Scanner-specific artifacts
+    artifacts:
+      bias_field: true
+      noise_levels: [0.01, 0.02, 0.05]
+      motion_artifacts: false  # For fetal imaging
+      
+  # Ground truth generation
+  ground_truth:
+    harmonized_reference: "site_1"  # Reference site for harmonization target
+    uncertainty_maps: true
+    segmentation_consistency: true
+    
+  # Validation test cases
+  test_cases:
+    # ELBO convergence validation
+    elbo_convergence:
+      num_volumes: 100
+      training_epochs: 50
+      convergence_threshold: 1e-4
+      
+    # KL divergence bounds
+    kl_bounds:
+      beta_values: [0.1, 0.5, 1.0, 2.0, 5.0]
+      theoretical_verification: true
+      
+    # Uncertainty calibration
+    calibration:
+      num_monte_carlo_samples: [8, 16, 32, 64]
+      temperature_scaling: true
+      reliability_bins: 15
+      
+    # Anatomical consistency
+    anatomical:
+      dice_preservation_threshold: 0.95
+      tissue_contrast_maintenance: true
+      spatial_coherence_validation: true

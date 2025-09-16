@@ -1,0 +1,166 @@
+# VANGUARD Base Model Configuration - Updated with Technical Specifications
+
+model:
+  name: "vanguard_base"
+  architecture: "bayesian_unet_3d"
+  
+  # Input specifications - Hybrid anatomical integration
+  input_channels: 18  # 1 T2w + 17 DrawEM tissue classes (one-hot encoded)
+  output_channels: 1  # Harmonized T2w
+  spatial_dims: 3
+  patch_size: [64, 64, 64]  # 64³ patches for computational efficiency
+  overlap_ratio: 0.25  # 25% overlap for patch-based reconstruction
+  
+  # Computational constraints - Clinical deployment targets
+  memory_constraints:
+    max_gpu_memory_training: 16  # GB
+    max_gpu_memory_inference: 8   # GB
+    target_inference_time: 30     # seconds per volume
+    enable_mixed_precision: true  # FP16 training
+    gradient_checkpointing: true  # Memory optimization
+  
+  # Bayesian components - Dual uncertainty strategy
+  bayesian:
+    primary_method: "variational_inference"
+    fallback_method: "monte_carlo_dropout" 
+    enable_variational_layers: true
+    prior_mean: 0.0
+    prior_std: 1.0
+    posterior_rho_init: -3.0
+    kl_divergence_weight: 1e-4
+    monte_carlo_samples: 16
+    beta_vae_constraint: true  # Information bottleneck properties
+    
+  # Uncertainty quantification - Comprehensive framework
+  uncertainty:
+    method: "hybrid"  # Both variational and MC dropout
+    calibration_temperature: 1.0
+    enable_predictive_entropy: true
+    target_ece_threshold: 0.05  # Expected Calibration Error < 5%
+    uncertainty_propagation: true
+    
+  # Anatomical priors - Multi-scale integration
+  anatomical_priors:
+    # Volume-level: dHCP template registration
+    dhcp_template_path: "data/templates/dhcp_29week_template.nii.gz"
+    enable_template_alignment: true
+    
+    # Voxel-level: DrawEM tissue segmentations
+    drawem_classes: 17
+    tissue_encoding: "one_hot"  # Convert to one-hot channels
+    
+    # Network integration: Anatomical encoder
+    anatomical_encoder:
+      enable: true
+      input_channels: 17  # DrawEM classes
+      latent_dims: 64
+      conditioning_strategy: "decoder_injection"
+    
+  # Tissue-adaptive regularization - Hybrid learned weighting
+  adaptive_regularization:
+    enable_learned_weighting: true
+    enable_statistical_weighting: true
+    
+    # Learned component: W_learned * seg_statistics + b_learned
+    learned_network:
+      hidden_dims: [32, 16, 8]
+      activation: "sigmoid"
+      
+    # Statistical component: Var(S_t)/Mean(S_t) + λ_prior  
+    statistical_measures:
+      - "tissue_variance"
+      - "tissue_mean"
+      - "spatial_coherence"
+    
+    lambda_prior: 0.1
+    
+  # Architecture details - 3D patch-based processing
+  encoder:
+    depths: [2, 2, 2, 2]  # Reduced for 64³ patches
+    channels: [32, 64, 128, 256]
+    dropout_rates: [0.1, 0.2, 0.3, 0.4]
+    bayesian_layers: [true, true, true, true]  # All conv layers Bayesian
+    
+  decoder:
+    use_attention: true
+    skip_connections: true
+    deep_supervision: false
+    anatomical_conditioning: true  # Inject anatomical features
+    
+  # Mathematical validation requirements
+  validation:
+    elbo_convergence_check: true
+    kl_divergence_bounds_verification: true
+    uncertainty_calibration_ece: true
+    anatomical_consistency_dice: true
+    synthetic_data_testing: true
+
+# Training configuration
+training:
+  # ELBO optimization
+  loss_function: "elbo_with_anatomical_regularization"
+  elbo_components:
+    reconstruction_loss: "mse"
+    kl_divergence_weight: 1e-4
+    anatomical_regularization_weight: 1e-3
+  
+  # Optimizer settings
+  optimizer: "adam"
+  learning_rate: 1e-4
+  weight_decay: 1e-5
+  
+  # Memory optimization
+  gradient_accumulation_steps: 4
+  mixed_precision: true
+  
+  # Monitoring and validation
+  uncertainty_tracking: true
+  wandb_logging: true
+  checkpoint_every_n_epochs: 5
+
+# Data configuration
+data:
+  # BIDS structure with DrawEM integration
+  dataset_format: "bids_with_drawem"
+  
+  # Input tensor specification: [B, 18, H, W, D]
+  input_structure:
+    t2w_channel: 0  # T2-weighted volume
+    drawem_channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]  # Tissue classes
+  
+  # Preprocessing pipeline
+  preprocessing:
+    intensity_normalization: "z_score"
+    spatial_resampling: [0.5, 0.5, 0.5]  # mm isotropic
+    template_registration: true
+    
+  # Age-balanced sampling for demographic matching
+  sampling:
+    strategy: "age_balanced_cross_site"
+    gestational_age_bins: 10
+    min_subjects_per_bin: 5
+
+# Evaluation metrics
+evaluation:
+  # Clinical validation
+  traveling_subject_validation: true
+  
+  # Harmonization quality
+  harmonization_metrics:
+    - "ssim"
+    - "psnr" 
+    - "tissue_contrast_preservation"
+    - "anatomical_consistency_dice"
+  
+  # Uncertainty quantification
+  uncertainty_metrics:
+    - "expected_calibration_error"
+    - "reliability_diagram"
+    - "predictive_entropy"
+    - "epistemic_aleatoric_decomposition"
+  
+  # Benchmark comparisons
+  baseline_methods:
+    - "calamiti"
+    - "iguane"
+    - "combat"
