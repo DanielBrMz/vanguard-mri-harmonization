@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  vanguard-dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: vanguard:latest
+    container_name: vanguard-dev
+    volumes:
+      - ..:/workspace/vanguard
+      - vanguard-data:/data
+      - vanguard-experiments:/experiments
+    ports:
+      - "8888:8888"  # Jupyter
+      - "6006:6006"  # TensorBoard
+      - "8080:8080"  # MLflow
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+    runtime: nvidia
+    stdin_open: true
+    tty: true
+    
+  jupyter:
+    extends: vanguard-dev
+    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root
+    
+volumes:
+  vanguard-data:
+  vanguard-experiments:
