@@ -35,11 +35,7 @@ python -c "import vanguard; print('VANGUARD successfully installed')"
 
 ## Project Status
 
-🚧 **Under Active Development** - Core mathematical foundations being implemented by Daniel Barreras
-
-## About the Author
-
-Daniel Barreras is developing VANGUARD as part of advanced research in Bayesian deep learning applications to medical image harmonization. This work focuses on principled uncertainty quantification and anatomical prior integration for fetal brain MRI analysis.
+🚧 **Under Active Development**
 
 ## Documentation
 
