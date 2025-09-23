@@ -6,9 +6,7 @@
 
 A novel Bayesian deep learning approach for cross-site MRI harmonization combining uncertainty quantification, anatomical priors, and adaptive tissue-specific regularization for T2-weighted fetal brain MRI.
 
-**Author**: Daniel Barreras ([DanielBrMz](https://github.com/DanielBrMz))
-
-## Key Innovations
+## Key Features
 
 - **Bayesian Neural Architecture**: Variational inference with principled uncertainty quantification
 - **Anatomical Prior Integration**: dHCP template-guided harmonization with tissue segmentation awareness  
